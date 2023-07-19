@@ -72,11 +72,11 @@ id2tags = {}
 for tag, i in tags2id.items():
     id2tags[i] = tag
 
-#get max length of y
-max_len_y = 0
+max_len_x = 0
+for x in x_preprocessed:
+    if len(x) > max_len_x:
+        max_len_x = len(x)
 
-for tag in y:
-    max_len_y = max(max_len_y, len(tag))
 
 
 def preprocess_tags(tags2id, y_ready):
@@ -86,13 +86,43 @@ def preprocess_tags(tags2id, y_ready):
         for tag in y:
             y_temp.append(tags2id[tag])
 
-        for i in range(max_len_y - len(y_temp)):
-            y_temp.append('0')
 
         y_preprocessed.append(y_temp)
 
-    return y_preprocessed
+    return pad_sequences(y_preprocessed, maxlen=max_len_x, padding='post', value=0)
 
-print(max_len_y)
-print(preprocess_tags(tags2id, y)[:10])
 
+y_preprocessed = preprocess_tags(tags2id, y)
+
+x_train = x_preprocessed[0:trainLen]
+y_train = y_preprocessed[0:trainLen]
+
+x_val = x_preprocessed[trainLen:trainLen+evalLen]
+y_val = y_preprocessed[trainLen:trainLen+evalLen]
+
+
+train_dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+eval_dataset = tf.data.Dataset.from_tensor_slices((x_val, y_val))
+train_dataset = train_dataset.batch(32)
+eval_dataset = eval_dataset.batch(32)
+
+print(f'x_train shape: {x_train.shape}')
+print(f'y_train shape: {y_train.shape}')
+
+print(f'x_val shape: {x_val.shape}')
+print(f'y_val shape: {y_val.shape}')
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(len(word_index) + 1, 128, input_length=maxLen),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128, return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64,  return_sequences=True)),
+    tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(len(unique_tokens), activation='softmax'))
+])
+
+print(model.summary())
+
+model.compile(loss='sparse_categorical_crossentropy',
+                optimizer=tf.keras.optimizers.Adam(1e-4),
+                metrics=['accuracy'])
+
+history = model.fit(train_dataset, epochs=10, validation_data=eval_dataset)
