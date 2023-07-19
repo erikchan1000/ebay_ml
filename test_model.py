@@ -42,9 +42,9 @@ print(y.head())
 
 
 
-maxLen = 110
-trainLen = 3000
-evalLen = 2000
+maxLen = 1100
+trainLen = 2500
+evalLen = 2500
 
 #Tokenize the data
 tokenizer = Tokenizer()
