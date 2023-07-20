@@ -125,4 +125,6 @@ model.compile(loss='sparse_categorical_crossentropy',
                 optimizer=tf.keras.optimizers.Adam(1e-4),
                 metrics=['accuracy'])
 
-history = model.fit(train_dataset, epochs=10, validation_data=eval_dataset)
+history = model.fit(train_dataset, epochs=3, validation_data=eval_dataset)
+
+model.save('model.keras')
