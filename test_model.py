@@ -42,7 +42,12 @@ print(y.head())
 
 
 
-maxLen = 1100
+maxLen = 0
+for title in x:
+    if len(title) > maxLen:
+        maxLen = len(title)
+
+        
 trainLen = 2500
 evalLen = 2500
 
@@ -116,6 +121,9 @@ model = tf.keras.Sequential([
     tf.keras.layers.Embedding(len(word_index) + 1, 128, input_length=maxLen),
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128, return_sequences=True)),
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64,  return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32,  return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(16,  return_sequences=True)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(8,  return_sequences=True)),
     tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(len(unique_tokens), activation='softmax'))
 ])
 
@@ -126,5 +134,3 @@ model.compile(loss='sparse_categorical_crossentropy',
                 metrics=['accuracy'])
 
 history = model.fit(train_dataset, epochs=3, validation_data=eval_dataset)
-
-model.save('model.keras')
