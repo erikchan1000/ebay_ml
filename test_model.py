@@ -12,6 +12,7 @@ from keras.utils import to_categorical
 from keras.layers import Dense, Input, Flatten, LSTM, Conv1D, MaxPooling1D, Dropout, Activation, Bidirectional
 
 df_train = pd.read_csv('./data/Listing_Titles.tsv', sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
+
 df_eval_base = pd.read_csv('./data/Train_Tagged_Titles.tsv', sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
 
 #Train has four columns: Record Number, Title, Token, Tag
@@ -20,28 +21,31 @@ df_eval_base = pd.read_csv('./data/Train_Tagged_Titles.tsv', sep='\t', dtype=str
 
 #NaN tags indicates that the token are part of the previous token tag
 df_train = df_train[0:5000]
+unique_tokens = df_eval_base['Tag'].unique()
 
+print(f"Head of training data:")
 print(df_train.head())
+print(f"\nHead of tagged data:")
 print(df_eval_base.head())
-
-print(df_eval_base['Tag'].unique())
+print(f"\nUnique Tags:")
+print(unique_tokens)
 
 #input consists of title
 #must separate each word in title into a token
 #then must categorize each token into a tag
-unique_tokens = df_eval_base['Tag'].unique()
+
 df_eval = df_eval_base.drop(columns=['Token'])
 df_eval = df_eval.groupby(['Record Number', 'Title'])['Tag'].apply(list).reset_index()
+print(f"\nHead of reformatted evaluation data (tags correspond by index with token):")
 print(df_eval.head())
 
 x = df_eval['Title']
 y = df_eval['Tag']
-
-print(x.head())
-print(y.head())
-
+'''print(x.head())'''
+'''print(y.head())'''
 
 
+#Splitting training data to get a testing set
 maxLen = 1100
 trainLen = 2500
 evalLen = 2500
@@ -52,7 +56,7 @@ tokenizer.fit_on_texts(x)
 sequences = tokenizer.texts_to_sequences(x)
 
 word_index = tokenizer.word_index
-print('Found %s unique tokens.' % len(word_index))
+'''print('Found %s unique tokens.' % len(word_index))'''
 ind2word = {v: k for k, v in word_index.items()}
 
 
@@ -63,7 +67,7 @@ for word, i in word2id.items():
 
 x_preprocessed = pad_sequences(sequences, maxlen=maxLen, padding='post')
 
-print(df_eval['Tag'])
+'''print(df_eval['Tag'])'''
 tags2id = {}
 for i, tag in enumerate(unique_tokens):
     tags2id[tag] = i
@@ -77,7 +81,7 @@ for x in x_preprocessed:
     if len(x) > max_len_x:
         max_len_x = len(x)
 
-
+#preprocess_tags adds empty values to ensure all the different length titles have the same dimensions (makes all the titles the same length as the max length title)
 
 def preprocess_tags(tags2id, y_ready):
     y_preprocessed = []
@@ -106,11 +110,12 @@ eval_dataset = tf.data.Dataset.from_tensor_slices((x_val, y_val))
 train_dataset = train_dataset.batch(32)
 eval_dataset = eval_dataset.batch(32)
 
-print(f'x_train shape: {x_train.shape}')
+'''print(f'x_train shape: {x_train.shape}')
 print(f'y_train shape: {y_train.shape}')
-
 print(f'x_val shape: {x_val.shape}')
-print(f'y_val shape: {y_val.shape}')
+print(f'y_val shape: {y_val.shape}')'''
+
+print(f"Shape of data is {x_train.shape} where {x_train.shape[0]} represents the number of entries and {x_train.shape[1]} represents the maximum number of tokens in a single title.")
 
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(len(word_index) + 1, 128, input_length=maxLen),
@@ -126,3 +131,5 @@ model.compile(loss='sparse_categorical_crossentropy',
                 metrics=['accuracy'])
 
 history = model.fit(train_dataset, epochs=10, validation_data=eval_dataset)
+
+model.save('model.h5')
