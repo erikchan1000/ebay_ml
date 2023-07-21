@@ -28,9 +28,3 @@ from transformers import TFBertModel
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 
-df_eval_base = pd.read_csv('./data/Train_Tagged_Titles.tsv', sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
-
-print(df_eval_base.head())
-
-print(f"Unique tags: {df_eval_base.Tag.unique()}")
-

@@ -7,76 +7,37 @@ from keras.utils import pad_sequences
 
 
 class CleanData:
-    def __init__(self, train_file, eval_file):
-        self.df_train= train_file
-        self.df_eval_base = eval_file
-        self.unique_tokens = self.df_eval_base['Tag'].unique()
-        self.df_eval = self.df_eval_base.drop(columns=['Token']).groupby(['Record Number', 'Title'])['Tag'].apply(list).reset_index()
-        self.x = self.df_eval['Title']
-        self.y = self.df_eval['Tag']
-        self.maxLen = 0
-        self.trainLen = len(self.df_train)
-        self.evalLen = len(self.df_eval)
-        self.x_preprocessed = self.process_x(x)
+    def __init__(self, path):
+        self.path = path
 
-        
-        for title in self.x:
-            if len(title) > self.maxLen:
-                self.maxLen = len(title)
+    def clean_data(self):
+        df_eval_base = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
+        print(df_eval_base.head())
 
-    def word2id(self):
-      tokenizer = Tokenizer()
-      tokenizer.fit_on_texts(self.x)
-      
-      word2id = tokenizer.word_index
-      return word2id
-    
-    def id2word(self, word_index):
-      return {v: k for k, v in word_index.items()}
-    
-    def tags2id(self):
-      tags2id = {}
-      for i, tag in enumerate(self.unique_tokens):
-          tags2id[tag] = i
-      return tags2id
-    
-    def id2tags(self, tags2id):
-      return {tag: i for tag, i in tags2id.items()}
-    
-    def process_x(self, x):
-        tokenizer = Tokenizer()
-        tokenizer.fit_on_texts(self.x)
-        sequences = tokenizer.texts_to_sequences(x)
-        return pad_sequences(sequences, maxlen=self.maxLen, padding='post', value=37)
+        print(f"Unique tags: {df_eval_base.Tag.unique()}")
 
+        df_eval = df_eval_base.drop(columns=['Title'])
 
-print(df_eval['Tag'])
-tags2id = {}
-for i, tag in enumerate(unique_tokens):
-    tags2id[tag] = i
+        print(df_eval.head(50))
 
-id2tags = {}
-for tag, i in tags2id.items():
-    id2tags[i] = tag
+        #use record number as the new index
+        #create a new dataframe with the record number as the index, tokens as list of tokens, and tags as list of tags
 
-max_len_x = 0
-for x in x_preprocessed:
-    if len(x) > max_len_x:
-        max_len_x = len(x)
+        df_tokens = df_eval.groupby(['Record Number'])['Token'].apply(list)
 
+        #reset record number to start from 1 and increment by 1
+        df_tokens = df_tokens.reset_index()
+        df_tokens['Record Number'] = df_tokens.index + 1
+        print(df_tokens.head(50))
 
+        #create new data frame with list of tags
+        df_tags = df_eval.groupby(['Record Number'])['Tag'].apply(list)
+        df_tags = df_tags.reset_index()
+        df_tags['Record Number'] = df_tags.index + 1
+        print(df_tags.head(50))
 
-def preprocess_tags(tags2id, y_ready):
-    y_preprocessed = []
-    for y in y_ready:
-        y_temp = []
-        for tag in y:
-            y_temp.append(tags2id[tag])
+        #merge the two dataframes
+        df = pd.merge(df_tokens, df_tags, on='Record Number')
 
+        return df
 
-        y_preprocessed.append(y_temp)
-
-    return pad_sequences(y_preprocessed, maxlen=max_len_x, padding='post', value=0)
-
-
-y_preprocessed = preprocess_tags(tags2id, y)
