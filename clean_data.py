@@ -41,3 +41,5 @@ class CleanData:
 
         return df
 
+train_df = CleanData('data/Train_Tagged_Titles.tsv').clean_data()
+
