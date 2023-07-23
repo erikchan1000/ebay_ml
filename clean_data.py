@@ -17,21 +17,29 @@ class CleanData:
 
 
         #use record number as the new index
-        #create a new dataframe with the record number as the index, tokens as list of tokens, and tags as list of tags
-
+        #new df_tokens data frame that merge all tokens with same record number into a list of tokens while maintaining the order
         df_tokens = df_eval.groupby(['Record Number'])['Token'].apply(list)
-
-        #reset record number to start from 1 and increment by 1
-        df_tokens = df_tokens.reset_index()
-        df_tokens['Record Number'] = df_tokens.index + 1
 
         #create new data frame with list of tags
         df_tags = df_eval.groupby(['Record Number'])['Tag'].apply(list)
-        df_tags = df_tags.reset_index()
-        df_tags['Record Number'] = df_tags.index + 1
 
         #merge the two dataframes
         df = pd.merge(df_tokens, df_tags, on='Record Number')
 
-        return df
+        #sort the data frame by record number
+        df = df.sort_values(by=['Record Number'])
+        
+        #assign Record Number key to column index
+        df['Record Number'] = df.index
+        #reset index
+        df = df.reset_index(drop=True, inplace=False)
+        #move Record Number column to the front
+        cols = df.columns.tolist()
+        cols = cols[-1:] + cols[:-1]
+        df = df[cols]
 
+        df['Record Number'] = df['Record Number'].astype(int)
+        df = df.sort_values(by=['Record Number'])
+
+        df = df.reset_index(drop=True, inplace=False)
+        return df
