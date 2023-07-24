@@ -12,34 +12,34 @@ class CleanData:
 
     def clean_data(self):
         df_eval_base = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
-        print(df_eval_base.head())
-
-        print(f"Unique tags: {df_eval_base.Tag.unique()}")
 
         df_eval = df_eval_base.drop(columns=['Title'])
 
-        print(df_eval.head(50))
 
         #use record number as the new index
-        #create a new dataframe with the record number as the index, tokens as list of tokens, and tags as list of tags
-
+        #new df_tokens data frame that merge all tokens with same record number into a list of tokens while maintaining the order
         df_tokens = df_eval.groupby(['Record Number'])['Token'].apply(list)
-
-        #reset record number to start from 1 and increment by 1
-        df_tokens = df_tokens.reset_index()
-        df_tokens['Record Number'] = df_tokens.index + 1
-        print(df_tokens.head(50))
 
         #create new data frame with list of tags
         df_tags = df_eval.groupby(['Record Number'])['Tag'].apply(list)
-        df_tags = df_tags.reset_index()
-        df_tags['Record Number'] = df_tags.index + 1
-        print(df_tags.head(50))
 
         #merge the two dataframes
         df = pd.merge(df_tokens, df_tags, on='Record Number')
 
+        #sort the data frame by record number
+        df = df.sort_values(by=['Record Number'])
+        
+        #assign Record Number key to column index
+        df['Record Number'] = df.index
+        #reset index
+        df = df.reset_index(drop=True, inplace=False)
+        #move Record Number column to the front
+        cols = df.columns.tolist()
+        cols = cols[-1:] + cols[:-1]
+        df = df[cols]
+
+        df['Record Number'] = df['Record Number'].astype(int)
+        df = df.sort_values(by=['Record Number'])
+
+        df = df.reset_index(drop=True, inplace=False)
         return df
-
-train_df = CleanData('data/Train_Tagged_Titles.tsv').clean_data()
-
