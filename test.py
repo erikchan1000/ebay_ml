@@ -31,7 +31,6 @@ from sklearn.model_selection import train_test_split
 
 train_df = CleanData('data/Train_Tagged_Titles.tsv').clean_data()
 
-process = ProcessData(train_df)
 
 processed_df = ProcessData(train_df)
 train_x, train_y, max_x_id, max_y_id = processed_df.pad_sequences()
@@ -52,6 +51,7 @@ print(val_x.shape, val_y.shape)
 pred = model.predict(val_x)
 print(pred.shape)
 
-reformat = process.reformat_output(pred)
+reformat = processed_df.reformat_output(pred)
 print(reformat[0])
 print(val_y[0])
+print(processed_df.id2tag)
