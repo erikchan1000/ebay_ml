@@ -53,6 +53,8 @@ print(train_y.shape)
 print(val_x.shape)
 print(val_y.shape)
 
+print(f'Maximum token id: {max_x_id}')
+print(f'Maximum tag id: {max_y_id}')
 
 #build model
 def build_model(max_x_id, max_y_id):
@@ -61,7 +63,7 @@ def build_model(max_x_id, max_y_id):
     bert_outputs = bert_layer(input_word_ids)
     last_hidden_state = bert_outputs[0]
     print(last_hidden_state)
-    output = tf.keras.layers.Dense(max_y_id+2, activation='softmax')(last_hidden_state)
+    output = tf.keras.layers.Dense(max_y_id + 2, activation='softmax')(last_hidden_state)
     model = tf.keras.Model(inputs=input_word_ids, outputs=output)
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5), loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
     return model
@@ -70,9 +72,8 @@ with strategy.scope():
     model = build_model(max_x_id, max_y_id)
     model.summary()
 
-#train model
 early_stopping = EarlyStopping(monitor='val_loss', patience=2, verbose=0, mode='min', restore_best_weights=True)
-history = model.fit(train_x, train_y, validation_data=(val_x, val_y), epochs=3, batch_size=32, callbacks=[early_stopping], verbose=2)
+history = model.fit(train_x, train_y, validation_data=(val_x, val_y), epochs=20, batch_size=32, callbacks=[early_stopping], verbose=2)
 
 #plot accuracy and loss
 def plot_graphs(history, string):
@@ -88,3 +89,5 @@ plot_graphs(history, 'accuracy')
 plot_graphs(history, 'loss')
 
 #save model
+model.save('./models/bert_model.h5')
+

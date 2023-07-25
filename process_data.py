@@ -33,15 +33,19 @@ class ProcessData:
     
     def __get_id2token(self):
         id2token = {v: k for k, v in self.token2id.items()}
+        #add padding to id2token
+        id2token[len(id2token.keys())] = '__PADDING'
         return id2token
     
     def __get_tag2id(self):
         tag2id = {tag: i for i, tag in enumerate(self.unique_tags)}
+        
         return tag2id
     
     def __get_id2tag(self):
         id2tag = {v: k for k, v in self.tag2id.items()}
-        #print(id2tag)
+        #add padding to id2tag
+        id2tag[len(id2tag.keys())] = '__PADDING'
         return id2tag
     
     def convert_tokens_tags_to_ids(self):
@@ -67,54 +71,18 @@ class ProcessData:
         return title_list.split(" ")
 
     def reformat_output(self, output):
-        #map for id -> tag
-        map = self.id2tag
-        map[len(map.keys())] = 'PADDING'
-        #df should be padded/cleaned already 
-        
-        tokens = pd.DataFrame(columns = ['Record', 'Token'])
-        for x in range(self.df.shape[0]):
-            for token in self.df['Token'][x]:
-                add = pd.series(data = [x+1, token], index = ['Record', 'Token'])
-                tokens.append(add, ignore_index = True)
-        
+        #output has shape (inputs, max_length, num_tags)
 
-        #model output is sequential list of tag ids that match up w the order of tokens
-        #need to assign record numbers / tokens back to the tag ids
-        
-        tokens['Tag'] = output
+        #convert output of logits to tag ids
+        output = np.argmax(output, axis=-1)
 
-        for x in tokens['Tag']:
-            name = map[x]
-            tokens.replace['Tag'][x] = name
+        #convert tag ids to tags
+        output = [[self.id2tag[tag_id] for tag_id in row] for row in output]
+        print('padded output: ', output)
+        #remove padding
+        output = [[tag for tag in row if tag != '__PADDING'] for row in output]
 
-        print(tokens)
-
-        #tokens is df of [record number, tokens, tag_id]
-
-        '''
-        final = pd.DataFrame(columns = [''])
-        curr = []
-        for x in range(len(output)):
-            #need to merge consecutive tokens that have same tags (NaN)
-            if output[x] == 37 and len(curr) == 0:
-                curr.append(x)
-                curr.append(tokens['Token'][x])
-
-            elif output[x] == 37:
-                curr.append(tokens['Token'][x])
-
-            elif len(curr) > 0 and output[x] != 37:
-
-                curr = []
-
-            else:
-                curr = []
-
-
-        #output should be tab seperated values: [record number] [aspect name (tag)] [aspect value (token)]
-        '''
-
+        return output
     
 
     
