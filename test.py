@@ -53,3 +53,5 @@ pred = model.predict(val_x)
 print(pred.shape)
 
 reformat = process.reformat_output(pred)
+print(reformat[0])
+print(val_y[0])
