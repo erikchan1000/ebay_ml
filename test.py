@@ -9,6 +9,7 @@ from keras.callbacks import EarlyStopping
 import os
 from clean_data import CleanData
 from keras.utils import pad_sequences
+from process_data import ProcessData
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
@@ -30,6 +31,11 @@ from sklearn.model_selection import train_test_split
 
 train_df = CleanData('data/Train_Tagged_Titles.tsv').clean_data()
 print(train_df.head(50))
+
+#testing process data
+process_df = ProcessData(train_df)
+process_df.pad_sequences()
+
 
 #BERT Training model
 

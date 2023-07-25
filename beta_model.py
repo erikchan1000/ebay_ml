@@ -72,7 +72,7 @@ with strategy.scope():
 
 #train model
 early_stopping = EarlyStopping(monitor='val_loss', patience=2, verbose=0, mode='min', restore_best_weights=True)
-history = model.fit(train_x, train_y, validation_data=(val_x, val_y), epochs=15, batch_size=32, callbacks=[early_stopping], verbose=2)
+history = model.fit(train_x, train_y, validation_data=(val_x, val_y), epochs=3, batch_size=32, callbacks=[early_stopping], verbose=2)
 
 #plot accuracy and loss
 def plot_graphs(history, string):

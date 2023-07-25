@@ -43,3 +43,10 @@ class CleanData:
 
         df = df.reset_index(drop=True, inplace=False)
         return df
+    
+    def clean_data_quiz(self):
+        #normalize the data from training (record number, title) -> (record number, token)
+
+        df_eval_base = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
+
+
