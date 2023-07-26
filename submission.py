@@ -26,7 +26,6 @@ from clean_data import CleanData
 test_data = CleanData('data/Train_Tagged_Titles.tsv').clean_data()
 processed_test = ProcessData(test_data)
 id2tag = processed_test.get_id2tag()
-token2id = processed_test.get_token2id()
 
 x, y, max_x_id, max_y_id = processed_test.pad_sequences()
 print(max_x_id, max_y_id)
@@ -44,7 +43,7 @@ quiz_data = test.get_quiz_data()
 tf.keras.utils.get_custom_objects()['TFBertModel'] = TFBertModel
 model = tf.keras.models.load_model('./models/bert_model.h5')
 
-processed_data = ProcessQuiz(quiz_data, token2id, id2tag)
+processed_data = ProcessQuiz(quiz_data, id2tag)
 
 def get_max_length():
   quiz_x, max_x_id = processed_data.pad_title()

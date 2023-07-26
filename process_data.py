@@ -72,10 +72,9 @@ class ProcessData:
     
 
 class ProcessQuiz:
-    def __init__(self, df, token2id, id2tag):
+    def __init__(self, df, id2tag):
         self.df = df
         self.max_length = 61
-        self.token2id = token2id
         self.id2tag = id2tag
 
     
