@@ -40,11 +40,6 @@ train_x, train_y, max_x_id, max_y_id = processed_df.pad_sequences()
 print(train_x.shape)
 print(train_y.shape)
 
-train_x = train_x[:4501]
-train_y = train_y[:4501]
-eval_x = train_x[4501:]
-eval_y = train_y[4501:]
-
 #split data into train and validation sets
 train_x, val_x, train_y, val_y = train_test_split(train_x, train_y, test_size=0.2, random_state=42)
 
@@ -59,7 +54,7 @@ print(f'Maximum tag id: {max_y_id}')
 #build model
 def build_model(max_x_id, max_y_id):
     input_word_ids = tf.keras.layers.Input(shape=(None,), dtype=tf.int32, name='input_word_ids')
-    bert_layer = TFBertModel.from_pretrained('bert-base-uncased')
+    bert_layer = TFBertModel.from_pretrained('bert-base-german-cased')
     bert_outputs = bert_layer(input_word_ids)
     last_hidden_state = bert_outputs[0]
     print(last_hidden_state)

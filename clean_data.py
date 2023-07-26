@@ -10,6 +10,26 @@ class CleanData:
     def __init__(self, path):
         self.path = path
 
+    def get_quiz_data(self):
+        
+        df = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
+        #choose 2500 random rows
+        df = df.sample(n=2500, random_state=1)
+        #consists of columns record number and title
+        #create new data frame with list of title separated by space
+        df['Title'] = df['Title'].str.split()
+        
+        return df
+    
+    def get_all_data(self):
+        df = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
+        #choose 2500 random rows
+        #consists of columns record number and title
+        #create new data frame with list of title separated by space
+        df['Title'] = df['Title'].str.split()
+        
+        return df
+
     def clean_data(self):
         df_eval_base = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
 
@@ -43,10 +63,4 @@ class CleanData:
 
         df = df.reset_index(drop=True, inplace=False)
         return df
-    
-    def clean_data_quiz(self):
-        #normalize the data from training (record number, title) -> (record number, token)
-
-        df_eval_base = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
-
 

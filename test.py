@@ -55,3 +55,7 @@ reformat = processed_df.reformat_output(pred)
 print(reformat[0])
 print(val_y[0])
 print(processed_df.id2tag)
+
+#print processed_df with all columns and first 50 rows
+pd.set_option('display.max_columns', None)
+print(processed_df.df[-500 : ])
