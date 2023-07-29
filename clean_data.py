@@ -10,6 +10,13 @@ class CleanData:
     def __init__(self, path):
         self.path = path
 
+    def test(self):
+        
+        df = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)
+        #choose 2500 random rows
+
+        return df
+
     def get_quiz_data(self):
         
         df = pd.read_csv(self.path, sep='\t', dtype=str, keep_default_na=False, na_values=[""], quoting=csv.QUOTE_NONE)

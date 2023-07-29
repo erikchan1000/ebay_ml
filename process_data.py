@@ -40,7 +40,9 @@ class ProcessData:
     
     def convert_tokens_tags_to_ids(self):
         new_df = self.df.copy()
-        new_df['Token'] = new_df['Token'] = new_df['Token'].apply(lambda x: self.tz.convert_tokens_to_ids(x))
+        new_df['Token'] = new_df['Token'].apply(lambda x: [self.tz.tokenize(token) for token in x])
+        print(new_df['Token'].head(50))
+        new_df['Token'] = new_df['Token'].apply(lambda x : [self.tz.convert_tokens_to_ids(token) for token in x])
 
         print(new_df['Token'].head(50))
         new_df['Tag'] = new_df['Tag'].apply(lambda x: [self.tag2id[tag] for tag in x])
