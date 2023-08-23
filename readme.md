@@ -5,5 +5,3 @@ Explain model:
 - [] Data processing = Padding (dimensions/formatting of tokens, tags, and titles)
 - [] Bert Model
 - [] Use of bidirectional (GER and LSER) and time distribution layer
-- [] How to get bitches
-
